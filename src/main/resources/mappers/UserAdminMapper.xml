@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.spring.javagreenS_ljs.dao.UserAdminDAO">
+
+	<sql id="userAdminWhere">
+		<where>
+			<if test="search != null and search != ''">
+				AND ${search} like concat('%', #{searchValue},'%')
+			</if>
+			<if test="status_code != null and status_code >= 0">
+				AND status_code = #{status_code}
+			</if>
+			<if test="level != null and level != ''">
+				AND level = #{level}
+			</if>
+		</where>
+	</sql>
+
+	<select id="getUserListTotalCnt" resultType="Integer">
+		SELECT COUNT(user_idx) FROM ga_user
+		<include refid="userAdminWhere"></include>
+	</select>
+	
+	<select id="getUserList" parameterType="com.spring.javagreenS_ljs.vo.UserVO" resultType="com.spring.javagreenS_ljs.vo.UserVO">
+		SELECT * FROM ga_user
+		<include refid="userAdminWhere"></include>
+		LIMIT #{startIndexNo}, #{pageSize}
+	</select>
+	
+	<update id="updateUser" parameterType="com.spring.javagreenS_ljs.vo.UserVO">
+		UPDATE ga_user
+		SET 
+			name = #{name},
+			email = #{email},
+			tel = #{tel},
+			status_code = #{status_code},
+			gender = #{gender},
+			level = #{level},
+			point = #{point},
+			updated_date = NOW(),
+			deny_date = NULLIF(#{deny_date},''),
+			leave_date = NULLIF(#{leave_date},''),
+			leave_reason = #{leave_reason}
+		WHERE user_idx = #{user_idx}
+	</update>
+	
+</mapper>

@@ -1,0 +1,56 @@
+@charset "UTF-8";
+#pageContent {
+	font-family: 'MaruBuriExtraLight' !important;
+	font-family: 'MaruBuriLight' !important;
+	font-family: 'MaruBuri' !important;
+	font-family: 'MaruBuriBold' !important;
+	font-family: 'MaruBuriSemiBold' !important;
+}
+
+#discountPrice {
+	text-decoration: line-through;
+}
+
+#benefits {
+	margin: 10px;
+	padding: 10px;
+	background-color: whitesmoke;
+	font-family: 'Montserrat', sans-serif;
+	font-size: 12px;
+}
+
+.montserrat {
+	font-family: 'Montserrat', sans-serif;
+}
+
+#elevate_zoom {
+	display:block;
+}
+
+/*set a border on the images to prevent shifting*/
+#gallery_01 img {
+	border: 1px solid white;
+	overflow: hidden;
+}
+
+/*Change the colour*/
+.active img {
+	opacity: 1 !important;
+}
+
+.zoomWindowContainer {
+	width: 510px !important;
+}
+
+#small {
+	display: none;
+}
+	
+@media screen and (max-width:1200px) { 
+ 	#elevate {
+ 		display: none;
+ 	}
+ 	#small {
+		display: block;
+	}
+}

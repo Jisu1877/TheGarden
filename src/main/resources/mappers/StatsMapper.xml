@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.spring.javagreenS_ljs.dao.StatsDAO">
+	
+	<!-- 최근 5주간 판매액 통계 -->
+	<select id="getWeeklyTotalSales" resultType="com.spring.javagreenS_ljs.vo.StatsOrderVO">
+		SELECT
+		    YEAR(NOW()) AS 'year',
+			DATE_FORMAT(DATE_ADD(o.created_date, INTERVAL(1-DAYOFWEEK(o.created_date)) DAY), "%m-%d") AS start_date,
+			DATE_FORMAT(DATE_ADD(o.created_date, INTERVAL(7-DAYOFWEEK(o.created_date)) DAY), "%m-%d") AS end_date,
+			SUM(order_total_amount -  IFNULL(c.return_price, 0) - IFNULL(cr.return_price, 0) - IFNULL(r.return_price, 0)) AS total_sales
+		FROM ga_order o
+		LEFT JOIN ga_order_list l
+		ON o.order_idx = l.order_idx
+		LEFT JOIN ga_order_cancel c
+		ON c.order_list_idx = l.order_list_idx
+		LEFT JOIN ga_order_cancel_request cr
+		ON cr.order_idx = o.order_idx
+		LEFT JOIN ga_order_return r
+		ON r.order_idx = o.order_idx
+		GROUP BY CONCAT(YEAR(o.created_date), "/", WEEK(o.created_date))
+		ORDER BY YEAR, start_date DESC
+		LIMIT 5
+	</select>
+	
+	<select id="getLoginTimeList" resultType="com.spring.javagreenS_ljs.vo.StatsloginTimeVO">
+		SELECT
+			YEAR(NOW()) AS 'year',
+			DATE_FORMAT(DATE_ADD(login_time, INTERVAL(1-DAYOFWEEK(login_time)) DAY), "%m-%d") AS start_date,
+			DATE_FORMAT(DATE_ADD(login_time, INTERVAL(7-DAYOFWEEK(login_time)) DAY), "%m-%d") AS end_date,
+			Count(log_idx) AS visit
+		FROM ga_user_log
+		GROUP BY CONCAT(YEAR(login_time), "/", WEEK(login_time))
+		ORDER BY YEAR, start_date DESC
+		LIMIT 5
+	</select>
+	
+	<!-- 판매량 TOP5 상품 통계 -->
+	<select id="getBestSellingItemList" resultType="com.spring.javagreenS_ljs.vo.ItemVO">
+		SELECT * FROM ga_item
+		ORDER BY sale_quantity DESC
+		LIMIT 5
+	</select>
+	
+	<!-- 상태별 주문 횟수 통계 -->
+	<select id="getOrderCountByStatus" resultType="com.spring.javagreenS_ljs.vo.StatsOrderListVO">
+		SELECT IFNULL(A.status, 0) AS status, A.count FROM (
+			SELECT 
+				(CASE
+					WHEN order_status_code = '1'
+					THEN '신규주문'
+					WHEN order_status_code = '2'
+					THEN '배송준비'
+					WHEN order_status_code IN ('4','9')
+					THEN '배송중'
+					WHEN order_status_code IN ('6','18')
+					THEN '구매확정'
+					ELSE '그외'
+				END) AS status,
+				COUNT(order_list_idx) AS count
+			FROM ga_order_list
+			GROUP BY status
+			ORDER BY
+			    FIELD(STATUS, '신규주문', '배송준비', '배송중', '구매확정', '그외')
+		) AS A
+	</select>
+	
+	<!-- 취소 요청 총계 -->
+	<select id="getOrderCancelRequestCount" resultType="Integer">
+		SELECT COUNT(*) FROM ga_order_cancel_request WHERE request_answer_flag = 'n'
+	</select>
+	
+	<select id="getOrderExchangeCount" resultType="Integer">
+		SELECT COUNT(*) FROM ga_order_exchange WHERE request_flag IS NULL;
+	</select>
+	
+	<select id="getOrderReturnCount" resultType="Integer">
+		SELECT COUNT(*) FROM ga_order_return WHERE request_flag IS NULL;
+	</select>
+	
+	<select id="getClaimReasonCountList" resultType="com.spring.javagreenS_ljs.vo.StatsClaimVO">
+		SELECT cancel_reason AS reason, COUNT(cancel_reason) AS count FROM ga_order_cancel_request
+		UNION ALL
+		SELECT exchange_reason AS reason, COUNT(exchange_reason) AS count FROM ga_order_exchange
+		UNION ALL
+		SELECT return_reason AS reason, COUNT(return_reason) AS count FROM ga_order_return
+		GROUP BY reason
+		ORDER BY count DESC
+	</select>
+	
+</mapper>

@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.spring.javagreenS_ljs.dao.DeliveryDAO">
+	<select id="getDeliveryVO" resultType="com.spring.javagreenS_ljs.vo.UserDeliveryVO">
+		select * from ga_user_delivery where user_idx = #{user_idx} and default_flag = 'y'
+	</select>
+
+	<select id="getUserDeliveryInfor" resultType="com.spring.javagreenS_ljs.vo.UserDeliveryVO">
+		select * from ga_user_delivery where user_delivery_idx = #{delivery_idx}
+	</select>
+	
+	<select id="getDeliveryList" resultType="com.spring.javagreenS_ljs.vo.UserDeliveryVO">
+		select * from ga_user_delivery where user_idx = #{user_idx} and delete_flag = 'n'
+	</select>
+	
+	<insert id="setDeliveryInfor">
+		insert into ga_user_delivery values (DEFAULT, #{vo.user_idx}, #{vo.default_flag}, #{vo.title}, #{vo.delivery_name}, #{vo.delivery_tel}, #{vo.postcode}, #{vo.roadAddress}, #{vo.detailAddress}, #{vo.extraAddress}, #{vo.message}, DEFAULT, DEFAULT)
+	</insert>
+	
+	<update id="setDefaultChange">
+		update ga_user_delivery set default_flag = 'y' where user_delivery_idx = #{idx}
+	</update>
+	
+	<update id="setDefaultDelete">
+		update ga_user_delivery set default_flag = 'n' where user_idx = #{user_idx} and default_flag = 'y'
+	</update>
+	
+	<update id="setDelete">
+		update ga_user_delivery set delete_flag = 'y' where user_delivery_idx = #{idx}
+	</update>
+</mapper>

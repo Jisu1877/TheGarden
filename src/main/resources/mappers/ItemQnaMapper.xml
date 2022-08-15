@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.spring.javagreenS_ljs.dao.ItemQnaDAO">
+	
+	<sql id="qnaWhere">
+		<where>
+			<if test="search != null and search != ''">
+				AND ${search} like concat('%', #{searchValue},'%')
+			</if>
+ 			<if test="part != null and part != ''">
+				AND admin_answer_yn = #{part}
+			</if>
+			AND delete_yn = 'n'
+		</where>
+	</sql>
+	
+	<insert id="setItemQnaInsert" parameterType="com.spring.javagreenS_ljs.vo.ItemQnaVO">
+		insert into ga_item_qna values (DEFAULT, #{user_idx}, #{item_idx}, #{item_qna_content}, #{view_yn}, #{item_qna_pwd}, DEFAULT, DEFAULT, NULL, NULL, DEFAULT)
+	</insert>
+	
+	<select id="getItemQnaList" parameterType="com.spring.javagreenS_ljs.vo.ItemQnaVO" resultType="com.spring.javagreenS_ljs.vo.ItemQnaVO">
+		select * from ga_item_qna as qna
+		JOIN ga_user us
+		ON qna.user_idx = us.user_idx
+		where item_idx = #{item_idx} and qna.delete_yn = 'n' order by item_qna_idx
+	</select>
+	
+	<select id="getitemQnaListAll" parameterType="com.spring.javagreenS_ljs.vo.ItemQnaVO" resultType="com.spring.javagreenS_ljs.vo.ItemQnaVO">
+		select * from ga_item_qna as qna
+		JOIN ga_user us
+		ON qna.user_idx = us.user_idx
+		JOIN ga_item it
+		ON qna.item_idx = it.item_idx
+		<include refid="qnaWhere"></include>
+		order by item_qna_idx desc
+		LIMIT #{startIndexNo}, #{pageSize}
+	</select>
+	
+	<select id="getitemQnaListLimit5" resultType="com.spring.javagreenS_ljs.vo.ItemQnaVO">
+		select * from ga_item_qna as qna
+		JOIN ga_user us
+		ON qna.user_idx = us.user_idx
+		JOIN ga_item it
+		ON qna.item_idx = it.item_idx
+		where delete_yn = 'n'
+		order by item_qna_idx desc
+		LIMIT 0, 5
+	</select>
+	
+	<select id="getQnaTotalCnt" resultType="int">
+		select count(qna.item_qna_idx) from ga_item_qna as qna
+		JOIN ga_user us
+		ON qna.user_idx = us.user_idx
+		JOIN ga_item it
+		ON qna.item_idx = it.item_idx
+		<include refid="qnaWhere"></include>
+	</select>
+	
+	<select id="getItemQnaInfor" parameterType="com.spring.javagreenS_ljs.vo.ItemQnaVO" resultType="com.spring.javagreenS_ljs.vo.ItemQnaVO">
+		select * from ga_item_qna as qna
+		JOIN ga_user us
+		ON qna.user_idx = us.user_idx
+		JOIN ga_item it
+		ON qna.item_idx = it.item_idx
+		where qna.item_qna_idx = #{item_qna_idx} and qna.delete_yn = 'n'
+	</select>
+	
+	<select id="getItemQnaNoAnswerCount" resultType="int">
+		select count(item_qna_idx) from ga_item_qna
+		Where admin_answer_yn = 'n' and delete_yn = 'n'
+	</select>
+	
+	<select id="getItemQnaListUser" parameterType="com.spring.javagreenS_ljs.vo.ItemQnaVO" resultType="com.spring.javagreenS_ljs.vo.ItemQnaVO">
+		select * from ga_item_qna as qna
+		JOIN ga_user us
+		ON qna.user_idx = us.user_idx
+		JOIN ga_item it
+		ON qna.item_idx = it.item_idx
+		where qna.delete_yn = 'n' and qna.user_idx = #{user_idx}
+		order by qna.item_qna_idx desc
+	</select>
+	
+	<update id="setItemQnaAnswer" parameterType="com.spring.javagreenS_ljs.vo.ItemQnaVO">
+		update ga_item_qna set admin_answer = #{admin_answer}, admin_answer_yn = 'y', admin_answer_date = now() where item_qna_idx = #{item_qna_idx}
+	</update>
+	
+	<update id="setItemQnaDelete" parameterType="com.spring.javagreenS_ljs.vo.ItemQnaVO">
+		update ga_item_qna set delete_yn = 'y' where item_qna_idx = #{item_qna_idx}
+	</update>
+</mapper>

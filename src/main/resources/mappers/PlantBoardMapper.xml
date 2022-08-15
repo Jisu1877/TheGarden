@@ -1,0 +1,138 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.spring.javagreenS_ljs.dao.PlantBoardDAO">
+	
+	<sql id="plantWhere">
+		<where>
+			<if test="search != null and search != ''">
+				AND ${search} like concat('%', #{searchValue},'%')
+			</if>
+ 			<if test="part != null and part != ''">
+				AND admin_answer_yn = #{part}
+			</if>
+			AND delete_yn = 'n'
+		</where>
+	</sql>
+	
+	<insert id="setBoardInsert">
+		insert into ga_plant_board values (DEFAULT, #{vo.user_idx}, #{vo.user_id}, #{vo.email}, #{vo.title}, #{vo.content}, DEFAULT, DEFAULT, DEFAULT, #{vo.choice1}, #{vo.choice2}, #{vo.choice3}, #{vo.choice4}, #{vo.choice5}, #{vo.email_yn}, DEFAULT, DEFAULT, NULL, NULL)
+	</insert>
+	
+	<insert id="setBoardAdminInsert">
+		insert into ga_plant_board values (DEFAULT, #{vo.user_idx}, #{vo.user_id}, #{vo.email}, #{vo.title}, #{vo.content}, 'y', DEFAULT, DEFAULT, NULL, NULL, NULL, NULL, NULL, DEFAULT, DEFAULT, DEFAULT, NULL, NULL)
+	</insert>
+	
+	<insert id="setBoardReplyInsert" parameterType="com.spring.javagreenS_ljs.vo.PlantBoardReplyVO">
+		insert into ga_plant_board_reply values (DEFAULT, #{plant_board_idx}, #{user_id}, DEFAULT, #{content}, #{level}, #{levelOrder}, #{parents}, DEFAULT)
+	</insert>
+	
+	<select id="getBoardContent" resultType="com.spring.javagreenS_ljs.vo.PlantBoardVO">
+		select * from ga_plant_board where plant_board_idx = #{idx}
+	</select>
+	
+	<select id="getPreBoardContent" resultType="com.spring.javagreenS_ljs.vo.PlantBoardVO">
+		select * from ga_plant_board <![CDATA[ where plant_board_idx < #{idx}]]> 
+		and delete_yn = 'n' and notice_yn = 'n'
+		order by plant_board_idx desc limit 1
+	</select>
+	
+	<select id="getNextBoardContent" resultType="com.spring.javagreenS_ljs.vo.PlantBoardVO">
+		select * from ga_plant_board <![CDATA[ where plant_board_idx > #{idx}]]> 
+		and delete_yn = 'n' and notice_yn = 'n'
+		limit 1;
+	</select>
+	
+	<select id="getBoardList" parameterType="com.spring.javagreenS_ljs.vo.PlantBoardVO" resultType="com.spring.javagreenS_ljs.vo.PlantBoardVO">
+		select *,(select count(*) from ga_plant_board_reply where plant_board_idx = ga_plant_board.plant_board_idx) as reply_count, 
+		cast(TIMESTAMPDIFF(MINUTE, write_date, now()) / 60 as signed integer) AS diff_time from ga_plant_board
+		<include refid="plantWhere"></include>
+		order by notice_yn desc, plant_board_idx desc
+		LIMIT #{startIndexNo}, #{pageSize}
+	</select>
+	
+	<select id="getBoardTotalCnt" resultType="Integer">
+		select count(plant_board_idx) from ga_plant_board
+		<include refid="plantWhere"></include>
+	</select>
+	
+	<select id="getBoardListLimit5" resultType="com.spring.javagreenS_ljs.vo.PlantBoardVO">
+		select * from ga_plant_board
+		where notice_yn = 'n' and delete_yn = 'n'
+		order by plant_board_idx desc
+		LIMIT 0, 5
+	</select>
+	
+	<select id="getBoardListUser" resultType="com.spring.javagreenS_ljs.vo.PlantBoardVO">
+		select * from ga_plant_board
+		where delete_yn = 'n' and user_idx = #{user_idx}
+		order by plant_board_idx desc
+	</select>
+	
+	<select id="getPlantBoardNoAnswerCount" resultType="int">
+		select count(plant_board_idx) from ga_plant_board
+		where admin_content is NULL
+		AND delete_yn = 'n'
+	</select>
+	
+	<select id="getMaxLevelOrder" resultType="String">
+		select max(levelOrder) from ga_plant_board_reply where plant_board_idx = #{vo.plant_board_idx}
+	</select>
+	
+	<select id="getBoardReplyList" resultType="com.spring.javagreenS_ljs.vo.PlantBoardReplyVO">
+		select * from ga_plant_board_reply where plant_board_idx = #{idx} order by levelOrder
+	</select>
+	
+	<select id="getChildReplyList" resultType="com.spring.javagreenS_ljs.vo.PlantBoardReplyVO" parameterType="com.spring.javagreenS_ljs.vo.PlantBoardReplyVO">
+		select * from ga_plant_board_reply where parents = #{plant_board_reply_idx}
+	</select>
+	
+	<update id="setBoardViewsUp">
+		update ga_plant_board set views = views + 1 where plant_board_idx = #{idx}
+	</update>
+	
+	<update id="setBoardAdminAnswer" parameterType="com.spring.javagreenS_ljs.vo.PlantBoardVO">
+		update ga_plant_board set admin_content = #{admin_content}, admin_write_date = now(), admin_answer_yn = 'y' where plant_board_idx = #{plant_board_idx}
+	</update>
+	
+	<update id="setBoardDelete">
+		update ga_plant_board set delete_yn = 'y' where plant_board_idx = #{idx}
+	</update>
+	
+	<update id="setBoardUpdateAdmin">
+		update ga_plant_board set admin_content = #{searchVO.admin_content} where plant_board_idx = #{idx} 
+	</update>
+	
+	<update id="setBoardUpdate" parameterType="com.spring.javagreenS_ljs.vo.PlantBoardVO">
+		update ga_plant_board 
+		set title = #{title},
+			content = #{content},
+			choice1 = #{choice1},
+			choice2 = #{choice2},
+			choice3 = #{choice3},
+			choice4 = #{choice4},
+			choice5 = #{choice5},
+			email_yn = #{email_yn}
+		where plant_board_idx = #{plant_board_idx}
+	</update>
+	
+	<update id="setBoardNoticeUpdate" parameterType="com.spring.javagreenS_ljs.vo.PlantBoardVO">
+		update ga_plant_board 
+		set title = #{title},
+			content = #{content}
+		where plant_board_idx = #{plant_board_idx}
+	</update>
+	
+	<update id="setLevelOrderPlusUpdate" parameterType="com.spring.javagreenS_ljs.vo.PlantBoardReplyVO">
+		update ga_plant_board_reply set levelOrder = levelOrder + 1 where plant_board_idx = #{plant_board_idx} and levelOrder > #{levelOrder}
+	</update>
+	
+	<update id="setReplyDelete" parameterType="com.spring.javagreenS_ljs.vo.PlantBoardReplyVO">
+		update ga_plant_board_reply set delete_yn = 'y' where plant_board_reply_idx = #{plant_board_reply_idx}
+	</update>
+	
+	<delete id="setReplyDeleteReal" parameterType="com.spring.javagreenS_ljs.vo.PlantBoardReplyVO">
+		delete from ga_plant_board_reply where plant_board_reply_idx = #{plant_board_reply_idx}
+	</delete>
+</mapper>

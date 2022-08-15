@@ -1,0 +1,156 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.spring.javagreenS_ljs.dao.UserDAO">
+	<select id="getUserInfor" resultType="com.spring.javagreenS_ljs.vo.UserVO">
+		select * from ga_user where user_id = #{user_id};
+	</select>
+	
+	<select id="getUserInforIdx" resultType="com.spring.javagreenS_ljs.vo.UserVO">
+		select * from ga_user where user_idx = #{user_idx};
+	</select>
+	
+	<select id="getCouponInfor" resultType="com.spring.javagreenS_ljs.vo.CouponVO">
+		select * from ga_coupon where coupon_idx = #{coupon_idx}
+	</select>
+	
+	<select id="getUserCouponList" resultType="com.spring.javagreenS_ljs.vo.CouponVO">
+		select * from ga_coupon_user cu
+		JOIN ga_coupon c
+		ON cu.coupon_idx = c.coupon_idx
+		where user_idx = #{user_idx} and use_flag = 'n'
+	</select>
+	
+	<select id="getUserCouponListAll" resultType="com.spring.javagreenS_ljs.vo.CouponVO">
+		select * from ga_coupon_user cu
+		JOIN ga_coupon c
+		ON cu.coupon_idx = c.coupon_idx
+		where user_idx = #{user_idx}
+	</select>
+	
+	<select id="getUserCouponListOnlyUseOk" resultType="com.spring.javagreenS_ljs.vo.CouponVO">
+		select * from ga_coupon_user cu
+		JOIN ga_coupon c
+		ON cu.coupon_idx = c.coupon_idx
+		where user_idx = #{user_idx} and use_flag = 'n'
+		and str_to_date(expiry_date, '%Y-%m-%d') >= str_to_date(now(), '%Y-%m-%d')
+	</select>
+	
+	<select id="getUserLevel" resultType="int">
+		select level from ga_user where user_idx = #{user_idx}
+	</select>
+	
+	<select id="getUserWishList" resultType="com.spring.javagreenS_ljs.vo.WishlistVO">
+		select * from ga_wishlist where user_idx = #{user_idx}
+	</select>
+	
+	<select id="getUserWishListJoinItem" resultType="com.spring.javagreenS_ljs.vo.WishlistVO">
+		select * from ga_wishlist wi
+		LEFT JOIN ga_item it
+		ON wi.item_idx = it.item_idx
+		where wi.user_idx = #{user_idx} and it.display_flag = 'y' and it.item_delete_flag = 'n'
+		order by wi.wish_date desc
+	</select>
+	
+	<select id="getRecentViews" resultType="com.spring.javagreenS_ljs.vo.RecentViewsVO">
+		select * from ga_recent_views rv
+		LEFT JOIN ga_item it
+		ON rv.item_idx = it.item_idx
+		where rv.user_idx = #{user_idx} and it.display_flag = 'y' and it.item_delete_flag = 'n'
+		order by rv.recent_date desc
+		limit 0, #{limit}
+	</select>
+	
+	<select id="getUserJoinCheck" resultType="com.spring.javagreenS_ljs.vo.UserVO">
+		select * from ga_user where user_id = #{user_id}
+	</select>
+	
+	<insert id="setUserJoin">
+		insert into ga_user values (DEFAULT, #{vo.user_id}, #{vo.user_pwd}, #{vo.name}, #{vo.gender}, #{vo.email}, #{vo.tel}, #{vo.user_image}, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, #{vo.agreement}, NULL, DEFAULT, NULL, NULL, NULL, NULL);
+	</insert>
+	
+	<insert id="setKakaoUserJoinOk" parameterType="com.spring.javagreenS_ljs.vo.UserVO">
+		insert into ga_user values (DEFAULT, #{user_id}, #{user_pwd}, #{user_id}, DEFAULT, #{email}, #{tel}, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, NULL, DEFAULT, NULL, NULL, NULL, NULL);
+	</insert>
+	
+	<insert id="setUserLog">
+		insert into ga_user_log values (DEFAULT, #{user_idx}, DEFAULT, #{host_ip});
+	</insert>
+	
+	<insert id="setCouponInsert">
+		insert into ga_coupon_user values (DEFAULT, #{vo.user_idx}, #{vo.coupon_idx}, #{vo.reason}, #{vo.expiry_date}, DEFAULT, NULL, DEFAULT)
+	</insert>
+	
+	<insert id="setWishlistInsert">
+		insert into ga_wishlist values (DEFAULT, #{user_idx}, #{item_idx}, DEFAULT);
+	</insert>
+	
+	<insert id="setRecentViewsInsert">
+		insert into ga_recent_views values (DEFAULT, #{user_idx}, #{item_idx}, DEFAULT);
+	</insert>
+	
+	<update id="setUserLoginUpdate">
+		update ga_user set login_count = login_count + 1, login_date = now() where user_id = #{user_id};
+	</update>
+	
+	<update id="setOrderUpdate">
+		update ga_user set buy_count = buy_count + 1, buy_price = buy_price + #{total_amount} where user_idx = #{user_idx}
+	</update>
+	
+	<update id="setPointUseUpate">
+		update ga_user set point = point - #{point} where user_idx = #{user_idx}
+	</update>
+	
+	<update id="setUserImageChange">
+		update ga_user set user_image = #{fileName}, updated_date = now() where user_idx = #{user_idx}
+	</update>
+	
+	<update id="setUserNameUpdate">
+		update ga_user set name = #{name}, updated_date = now() where user_idx = #{user_idx}
+	</update>
+	
+	<update id="setUserEmailUpdate">
+		update ga_user set email = #{email}, updated_date = now() where user_idx = #{user_idx}
+	</update>
+	
+	<update id="setUserTelUpdate">
+		update ga_user set tel = #{tel}, updated_date = now() where user_idx = #{user_idx}
+	</update>
+	
+	<update id="setUserGenderUpdate">
+		update ga_user set gender = #{gender}, updated_date = now() where user_idx = #{user_idx}
+	</update>
+	
+	<update id="setUserPwdUpdate">
+		update ga_user set user_pwd = #{encPwd}, updated_date = now() where user_idx = #{user_idx}
+	</update>
+	
+	<update id="setCouponUseFlag">
+		update ga_coupon_user set use_flag = 'y', use_date = now() where coupon_user_idx = #{coupon_user_idx}
+	</update>
+	
+	<update id="setUserGivePoint">
+		update ga_user set point = point + #{point} where user_idx = #{user_idx}
+	</update>
+	
+	<delete id="setWishlistDelete">
+		delete from ga_wishlist where user_idx = #{user_idx} and item_idx = #{item_idx}
+	</delete>
+	
+	<delete id="setRecentViewsDelete">
+		delete from ga_recent_views where user_idx = #{user_idx} and item_idx = #{item_idx}
+	</delete>
+	
+	<select id="getUserInforCountByTel" resultType="Integer">
+		select count(*) from ga_user where tel = #{tel}
+	</select>
+	
+	<select id="getUserInforFind" parameterType="com.spring.javagreenS_ljs.vo.UserVO" resultType="com.spring.javagreenS_ljs.vo.UserVO">
+		select * from ga_user where name = #{name} and email = #{email} and tel = #{tel} and status_code = 9
+	</select>
+	
+	<select id="getUserInforPwdFind" parameterType="com.spring.javagreenS_ljs.vo.UserVO" resultType="com.spring.javagreenS_ljs.vo.UserVO">
+		select * from ga_user where user_id = #{user_id} and email = #{email} and tel = #{tel} and status_code = 9
+	</select>
+</mapper>

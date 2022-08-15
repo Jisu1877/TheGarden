@@ -1,0 +1,305 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.spring.javagreenS_ljs.dao.OrderDAO">
+	<insert id="setOrderListTempInsert">
+		insert into ga_order_list_temp values (DEFAULT, #{vo.item_idx}, #{vo.user_idx}, #{vo.item_name}, #{vo.item_image}, #{vo.item_price}, #{vo.item_option_flag}, #{vo.option_idx}, #{vo.option_name}, #{vo.option_price}, #{vo.order_quantity}, NULL, NULL, NULL, NULL, #{vo.cart_idx}, DEFAULT);
+	</insert>
+	
+	<insert id="setOrderHistory">
+		insert into ga_order values (DEFAULT, #{orderVO.order_number}, #{orderVO.user_idx}, #{orderVO.order_total_amount}, #{orderVO.email}, #{orderVO.tel}, #{orderVO.user_delivery_idx}, NULL, #{orderVO.use_point}, #{orderVO.coupon_user_idx}, #{orderVO.coupon_amount}, DEFAULT);
+	</insert>
+	
+	<insert id="setOrderListHistory">
+		insert into ga_order_list values (DEFAULT, #{vo.order_idx}, #{vo.item_idx}, #{vo.item_name}, #{vo.item_image}, #{vo.item_price}, #{vo.item_option_flag}, #{vo.option_idx}, #{vo.option_name}, #{vo.option_price}, #{vo.order_quantity}, DEFAULT, DEFAULT, NULL, DEFAULT);
+	</insert>
+	
+	<insert id="setOrderCancelHistory">
+		insert into ga_order_cancel values (DEFAULT, #{vo.user_idx}, #{vo.order_list_idx}, #{vo.cancel_reason}, #{vo.return_price}, #{vo.return_bank_name}, #{vo.return_bank_user_name}, #{vo.return_bank_number}, #{vo.use_point}, #{vo.coupon_amount}, DEFAULT);
+	</insert>
+	
+	<insert id="setOrderCancelRequsetHistory">
+		insert into ga_order_cancel_request values (DEFAULT, #{vo.user_idx}, #{vo.order_idx}, #{vo.order_list_idx}, #{vo.use_point}, #{vo.coupon_amount}, #{vo.cancel_reason}, #{vo.return_price}, #{vo.return_bank_name}, #{vo.return_bank_user_name}, #{vo.return_bank_number}, NULL, NULL, DEFAULT, DEFAULT);
+	</insert>
+	
+	<insert id="setExchangeRequest">
+		insert into ga_order_exchange values (DEFAULT, #{vo.user_idx}, #{vo.order_idx}, #{vo.order_list_idx}, #{vo.exchange_reason}, #{vo.photo}, #{vo.user_message}, NULL, NULL, NULL, NULL, NULL, DEFAULT, NULL, NULL, NULL, DEFAULT, DEFAULT);
+	</insert>
+	
+	<insert id="setReturnRequest">
+		insert into ga_order_return values (DEFAULT, #{vo.user_idx}, #{vo.order_idx}, #{vo.order_list_idx}, #{vo.return_reason}, #{vo.photo}, #{vo.return_price}, #{vo.return_bank_name}, #{vo.return_bank_user_name}, #{vo.return_bank_number}, #{vo.user_message}, NULL, NULL, NULL, NULL, NULL, DEFAULT, NULL, DEFAULT, #{vo.use_point}, DEFAULT, DEFAULT);
+	</insert>
+	
+	<select id="getOrderListTempList" resultType="com.spring.javagreenS_ljs.vo.OrderListVO">
+		select * from ga_order_list_temp where user_idx = #{user_idx}
+	</select>
+	
+	<select id="getOrderIdx" resultType="int">
+		select max(order_idx) from ga_order where user_idx = #{user_idx}
+	</select>
+	
+	<select id="getOrderMaxIdx" resultType="int">
+		select max(order_idx) from ga_order
+	</select>
+	
+	<select id="getOrderListOnlyThisMonth" resultType="com.spring.javagreenS_ljs.vo.OrderListVO">
+		SELECT * FROM ga_order o
+		JOIN ga_order_list ol
+		ON o.order_idx = ol.order_idx
+		JOIN ga_item it
+		ON ol.item_idx = it.item_idx
+		WHERE o.user_idx = #{user_idx} and date(o.created_date) between date(#{firstDate}) and date(#{lastDate}) 
+		order by o.created_date desc
+	</select>
+	
+	<select id="getOrderList" resultType="com.spring.javagreenS_ljs.vo.OrderListVO">
+		SELECT * FROM ga_order o
+		JOIN ga_order_list ol
+		ON o.order_idx = ol.order_idx
+		JOIN ga_item it
+		ON ol.item_idx = it.item_idx
+		WHERE o.user_idx = #{user_idx}
+		order by o.created_date desc
+	</select>
+	
+	<select id="getOrderListOnlyChoice" resultType="com.spring.javagreenS_ljs.vo.OrderListVO">
+		SELECT * FROM ga_order o
+		JOIN ga_order_list ol
+		ON o.order_idx = ol.order_idx
+		JOIN ga_item it
+		ON ol.item_idx = it.item_idx
+		WHERE o.user_idx = #{user_idx} and  ol.order_status_code = #{order_status_code}
+		order by o.created_date desc
+	</select>
+	
+	<select id="getorderListOnlyOrder" resultType="com.spring.javagreenS_ljs.vo.OrderListVO">
+		SELECT * FROM ga_order o
+		JOIN ga_order_list ol
+		ON o.order_idx = ol.order_idx
+		JOIN ga_item it
+		ON ol.item_idx = it.item_idx
+		WHERE o.user_idx = #{user_idx} and (ol.order_status_code = '1' or ol.order_status_code = '2')
+		order by o.created_date desc
+	</select>
+	
+	<select id="getorderListOnlyOrderSearch" resultType="com.spring.javagreenS_ljs.vo.OrderListVO">
+		SELECT * FROM ga_order o
+		JOIN ga_order_list ol
+		ON o.order_idx = ol.order_idx
+		JOIN ga_item it
+		ON ol.item_idx = it.item_idx
+		WHERE o.user_idx = #{user_idx} and (ol.order_status_code = '1' or ol.order_status_code = '2')
+		and date(o.created_date) between date(#{start}) and date(#{end}) 
+		order by o.created_date desc
+	</select>
+	
+	<select id="getOrderListOnlyDeliveryOk" resultType="com.spring.javagreenS_ljs.vo.OrderListVO">
+		SELECT * FROM ga_order o
+		JOIN ga_order_list ol
+		ON o.order_idx = ol.order_idx
+		JOIN ga_item it
+		ON ol.item_idx = it.item_idx
+		WHERE o.user_idx = #{user_idx} and (ol.order_status_code = '5' or ol.order_status_code = '6' or ol.order_status_code = '17' or ol.order_status_code = '18')
+		order by o.created_date desc
+	</select>
+	
+	<select id="getOrderListOnlyChangeReturn" resultType="com.spring.javagreenS_ljs.vo.OrderListVO">
+		SELECT * FROM ga_order o
+		JOIN ga_order_list ol
+		ON o.order_idx = ol.order_idx
+		JOIN ga_item it
+		ON ol.item_idx = it.item_idx
+		WHERE o.user_idx = #{user_idx} and 
+		(ol.order_status_code = '7' or ol.order_status_code = '8' or ol.order_status_code = '9' or ol.order_status_code = '10' or ol.order_status_code = '17')
+		order by o.created_date desc
+	</select>
+	
+	<select id="getOrderListOnlyReturn" resultType="com.spring.javagreenS_ljs.vo.OrderListVO">
+		SELECT * FROM ga_order o
+		JOIN ga_order_list ol
+		ON o.order_idx = ol.order_idx
+		JOIN ga_item it
+		ON ol.item_idx = it.item_idx
+		WHERE o.user_idx = #{user_idx} and 
+		(ol.order_status_code = '3' or ol.order_status_code = '7' or ol.order_status_code = '8' or ol.order_status_code = '9' or ol.order_status_code = '10' 
+		or ol.order_status_code = '11' or ol.order_status_code = '12' or ol.order_status_code = '13' or ol.order_status_code = '14')
+		order by o.created_date desc
+	</select>
+	
+	<select id="getOrderListOnlyRefund" resultType="com.spring.javagreenS_ljs.vo.OrderListVO">
+		SELECT * FROM ga_order o
+		JOIN ga_order_list ol
+		ON o.order_idx = ol.order_idx
+		JOIN ga_item it
+		ON ol.item_idx = it.item_idx
+		WHERE o.user_idx = #{user_idx} and 
+		(ol.order_status_code = '11' or ol.order_status_code = '12' or ol.order_status_code = '13' or ol.order_status_code = '14')
+		order by o.created_date desc
+	</select>
+	
+	<select id="getOrderListSearch" resultType="com.spring.javagreenS_ljs.vo.OrderListVO">
+		SELECT * FROM ga_order o
+		JOIN ga_order_list ol
+		ON o.order_idx = ol.order_idx
+		JOIN ga_item it
+		ON ol.item_idx = it.item_idx
+		WHERE o.user_idx = #{user_idx} and date(o.created_date) between date(#{start}) and date(#{end}) 
+		order by o.created_date desc
+	</select>
+	
+	<select id="getorderListOnlyChangeOkSearch" resultType="com.spring.javagreenS_ljs.vo.OrderListVO">
+		SELECT * FROM ga_order o
+		JOIN ga_order_list ol
+		ON o.order_idx = ol.order_idx
+		JOIN ga_item it
+		ON ol.item_idx = it.item_idx
+		WHERE o.user_idx = #{user_idx} and date(o.created_date) between date(#{start}) and date(#{end}) 
+		and (ol.order_status_code = '7' or ol.order_status_code = '8' or ol.order_status_code = '9' or ol.order_status_code = '10')
+		order by o.created_date desc
+	</select>
+	
+	<select id="getorderListOnlyReturnOkSearch" resultType="com.spring.javagreenS_ljs.vo.OrderListVO">
+		SELECT * FROM ga_order o
+		JOIN ga_order_list ol
+		ON o.order_idx = ol.order_idx
+		JOIN ga_item it
+		ON ol.item_idx = it.item_idx
+		WHERE o.user_idx = #{user_idx} and date(o.created_date) between date(#{start}) and date(#{end}) 
+		and (ol.order_status_code = '11' or ol.order_status_code = '12' or ol.order_status_code = '13' or ol.order_status_code = '14')
+		order by o.created_date desc
+	</select>
+	
+	<select id="getorderListOnlySearch" resultType="com.spring.javagreenS_ljs.vo.OrderListVO">
+		SELECT * FROM ga_order o
+		JOIN ga_order_list ol
+		ON o.order_idx = ol.order_idx
+		JOIN ga_item it
+		ON ol.item_idx = it.item_idx
+		WHERE o.user_idx = #{user_idx} and date(o.created_date) between date(#{start}) and date(#{end})
+		and ol.order_status_code = #{code}
+		order by o.created_date desc
+	</select>
+	
+	<select id="getOrderListInfor" resultType="com.spring.javagreenS_ljs.vo.OrderListVO">
+		SELECT * FROM ga_order o
+		LEFT JOIN ga_order_list ol
+		ON o.order_idx = ol.order_idx
+		where o.order_idx = #{orderIdx} and ol.order_list_idx = #{listIdx}
+	</select>
+	
+	<select id="getorderCancelInfor" resultType="com.spring.javagreenS_ljs.vo.OrderCancelVO">
+		select * from ga_order_cancel where order_list_idx = #{listIdx}
+	</select>
+	
+	<select id="getorderListInfor2" resultType="com.spring.javagreenS_ljs.vo.OrderListVO">
+		select * from ga_order_list where order_list_idx = #{order_list_idx}
+	</select>
+	
+	<select id="getBuyCnt" resultType="int">
+		select count(*) from ga_order o
+		JOIN ga_order_list ol
+		ON o.order_idx = ol.order_idx
+		where ol.order_status_code = '6' and o.user_idx = #{user_idx};
+	</select>
+	
+	<select id="getAlreadyConfirmCheck" resultType="int">
+		select count(*) from ga_order o
+		JOIN ga_order_list ol
+		ON o.order_idx = ol.order_idx
+		where ol.order_status_code = '6' and o.user_idx = #{user_idx} and o.order_idx = #{order_idx};
+	</select>
+	
+	<select id="getOrderExchangeInfor" resultType="com.spring.javagreenS_ljs.vo.OrderExchangeVO">
+		select * from ga_order_exchange where order_list_idx = #{order_list_idx}
+	</select>
+	
+	<select id="getOrderReturnInfor" resultType="com.spring.javagreenS_ljs.vo.OrderReturnVO">
+		select * from ga_order_return where order_list_idx = #{order_list_idx}
+	</select>
+	
+	<select id="getOrderCancelOnlyRequest" resultType="int">
+		select count(*) from ga_order_cancel_request where order_idx = #{order_idx} and request_answer is null
+	</select>
+	
+	<select id="getOrderReturnOnlyRequest" resultType="int">
+		select count(*) from ga_order_return where order_idx = #{order_idx} and bring_status = 0
+	</select>
+	
+	<select id="getOrderCancelOnlyComplete" resultType="com.spring.javagreenS_ljs.vo.OrderCancelVO">
+		select * from ga_order_cancel_request cr
+		JOIN ga_order_cancel c
+		ON cr.user_idx = c.user_idx
+		where cr.order_idx = #{order_idx} and cr.request_answer = 'y' GROUP by cr.order_list_idx
+	</select>
+	
+	<select id="getOrderCancelOnlyComplete2" resultType="com.spring.javagreenS_ljs.vo.OrderCancelVO">
+		select * from ga_order_cancel oc 
+		JOIN ga_order_list ol
+		ON oc.order_list_idx = ol.order_list_idx
+		where ol.order_idx = #{order_idx}
+	</select>
+	
+	<select id="getOrderReturnOnlyComplete" resultType="com.spring.javagreenS_ljs.vo.OrderReturnVO">
+		select * from ga_order_return re
+		JOIN ga_order_list ol
+		ON re.order_list_idx = ol.order_list_idx
+		WHERE re.order_idx = #{order_idx} and re.bring_status = 1
+	</select>
+	
+	<select id="getShippingInfor" resultType="com.spring.javagreenS_ljs.vo.ShippingListVO">
+		select *, sl.created_date as shipping_date from ga_shipping_list sl
+		JOIN ga_order_list ol
+		ON sl.order_list_idx = ol.order_list_idx
+		JOIN ga_user_delivery ud
+		ON sl.user_delivery_idx = ud.user_delivery_idx
+		WHERE sl.order_list_idx = #{order_list_idx}
+	</select>
+	
+	<select id="getOrderListItemIdx" resultType="com.spring.javagreenS_ljs.vo.OrderListVO">
+		select * from ga_order_list where item_idx = #{item_idx} and (order_status_code = 1 or order_status_code = 2)
+	</select>
+	
+	<delete id="setOrderListTempDelete">
+		delete from ga_order_list_temp where user_idx = #{user_idx}
+	</delete>
+	
+	<update id="setOrder_total_amount_and_point">
+		update ga_order_list_temp set order_total_amount = #{temp.order_total_amount}, use_point = #{temp.use_point}, coupon_amount = #{temp.coupon_amount}, coupon_user_idx = #{temp.coupon_user_idx} where user_idx = #{temp.user_idx}
+	</update>
+	
+	<update id="setUsePointSub">
+		update ga_order set use_point = use_point - #{use_point} where order_idx = #{order_idx}
+	</update>
+	
+	<update id="setUsePointPlus">
+		update ga_order set use_point = use_point + #{use_point} where order_idx = #{order_idx}
+	</update>
+	
+	<update id="setCouponAmountPlus">
+		update ga_order set coupon_amount = coupon_amount + #{coupon_amount} where order_idx = #{order_idx}
+	</update>
+	<update id="setCouponAmountSub">
+		update ga_order set coupon_amount = coupon_amount - #{coupon_amount} where order_idx = #{order_idx}
+	</update>
+	
+	<update id="setExchangeAns">
+		update ga_order_exchange set request_flag = #{vo.request_flag}, exchange_admin_memo = #{vo.exchange_admin_memo}, bring_shipping_company = #{vo.bring_shipping_company}, bring_invoice_number = #{vo.bring_invoice_number}, request_answer_date = now()
+		where order_exchange_idx = #{vo.order_exchange_idx}
+	</update>
+	
+	<update id="setReturnAns">
+		update ga_order_return set request_flag = #{vo.request_flag}, return_admin_memo = #{vo.return_admin_memo}, bring_shipping_company = #{vo.bring_shipping_company}, bring_invoice_number = #{vo.bring_invoice_number}, request_answer_date = now()
+		where order_return_idx = #{vo.order_return_idx}
+	</update>
+	
+	<update id="setExchangeShipping">
+		update ga_order_exchange set bring_status = 1, exchange_shipping_company = #{vo.exchange_shipping_company}, exchange_invoice_number = #{vo.exchange_invoice_number}, exchange_delivery_date = now(), exchange_admin_memo = #{vo.exchange_admin_memo}
+		where order_exchange_idx = #{vo.order_exchange_idx}
+	</update>
+	
+	<update id="setReturnOk">
+		update ga_order_return set bring_status = 1, return_ok_date = now(), return_status = "1"
+		where order_return_idx = #{vo.order_return_idx}
+	</update>
+</mapper>

@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.spring.javagreenS_ljs.dao.CartDAO">
+
+	<insert id="setInputCart">
+		insert into ga_cart values (DEFAULT, #{vo.user_idx}, #{vo.item_idx}, #{vo.user_id}, #{vo.item_option_flag}, NULL, #{vo.quantity}, #{vo.total_price}, #{vo.shipping_group_code}, DEFAULT); 
+	</insert>
+	
+	<insert id="setInputCartWithOptions">
+		insert into ga_cart values (DEFAULT, #{vo.user_idx}, #{vo.item_idx}, #{vo.user_id}, #{vo.item_option_flag}, #{vo.item_option_idx}, #{vo.quantity}, #{vo.total_price}, #{vo.shipping_group_code}, DEFAULT);
+	</insert>
+	
+	<select id="getCartCnt" resultType="String">
+		select count(*) from ga_cart where user_idx = #{user_idx} GROUP BY user_idx;
+	</select>
+	
+	<select id="getCartCodeCheck" resultType="com.spring.javagreenS_ljs.vo.CartVO">
+		select * from ga_cart where shipping_group_code = #{shipping_group_code}
+	</select>
+	
+	<select id="getCartList" resultType="com.spring.javagreenS_ljs.vo.CartVO">
+		SELECT *, i.item_option_flag as flag FROM ga_cart c
+		LEFT JOIN ga_item i
+		ON c.item_idx = i.item_idx
+		LEFT JOIN ga_item_option o
+		ON c.item_option_idx = o.item_option_idx
+		WHERE user_idx = #{user_idx}
+	</select>
+	
+	<update id="setQuantity">
+		update ga_cart set quantity = quantity + ${vo.quantity} where shipping_group_code = #{vo.shipping_group_code}
+	</update>
+	
+	<update id="cartMinusPost">
+		update ga_cart set quantity = quantity - 1 where cart_idx = #{cartIdx}
+	</update>
+	
+	<update id="cartPlusPost">
+		update ga_cart set quantity = quantity + 1 where cart_idx = #{cartIdx}
+	</update>
+	
+	<delete id="setCartDelete">
+		delete from ga_cart where cart_idx = #{cartIdx}
+	</delete>
+</mapper>

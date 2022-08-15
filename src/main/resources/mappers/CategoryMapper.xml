@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.spring.javagreenS_ljs.dao.CategoryDAO">
+	
+	<select id="getCategoryGroupInfor" resultType="com.spring.javagreenS_ljs.vo.CategoryGroupVO">
+		select * from ga_category_group where category_group_code = #{category_group_code}
+	</select>
+	
+	<select id="getCategoryGroupInfor2" resultType="com.spring.javagreenS_ljs.vo.CategoryGroupVO">
+		select * from ga_category_group order by category_group_use_yn desc, category_group_level
+	</select>
+	
+	<select id="getCategoryMaxLevel" resultType="int">
+		select max(category_group_level) from ga_category_group
+	</select>
+	
+	<select id="getCategoryGroupInfor3" resultType="com.spring.javagreenS_ljs.vo.CategoryGroupVO">
+		select * from ga_category_group where category_group_level = #{category_group_level}
+	</select>
+	
+	<select id="getCategoryInfor" resultType="com.spring.javagreenS_ljs.vo.CategoryVO">
+		select * from ga_category where category_group_idx = #{idx}
+	</select>
+	
+	<select id="getCategoryOnlyUseInfor" resultType="com.spring.javagreenS_ljs.vo.CategoryVO">
+		select * from ga_category where category_group_idx = #{idx} and category_use_yn = 'y'
+	</select>
+	
+	<select id="getCategoryGroupInforOnlyUse" resultType="com.spring.javagreenS_ljs.vo.CategoryGroupVO">
+		select * from ga_category_group where category_group_use_yn = 'y'order by category_group_level
+	</select>
+	
+	<select id="getCategoryGroupCode" resultType="String">
+		select category_group_code from ga_category_group where category_group_idx = #{category_group_idx}
+	</select>
+	
+	<select id="getCategoryInfor2" resultType="com.spring.javagreenS_ljs.vo.CategoryVO">
+		select * from ga_category where category_idx = #{category_idx}
+	</select>
+	
+	<insert id="setCategoryGroup">
+		insert into ga_category_group values(DEFAULT, #{vo.category_group_code}, #{vo.category_group_name}, DEFAULT, #{vo.category_group_level})
+	</insert>
+	
+	<insert id="setCategory">
+		insert into ga_category values(DEFAULT, #{vo.category_group_idx}, #{vo.category_name}, DEFAULT)
+	</insert>
+	
+	<update id="setCategoryUseNot">
+		update ga_category_group set category_group_use_yn = 'n', category_group_level = 0 where category_group_idx = #{category_group_idx}
+	</update>
+	
+	<update id="setCategoryLevelSort">
+		update ga_category_group set category_group_level = #{changeValue} where category_group_level = #{changeLevel}
+	</update>
+	
+	<update id="setCategoryUse">
+		update ga_category_group set category_group_use_yn = 'y', category_group_level = #{vo.category_group_level} where category_group_idx = #{vo.category_group_idx}
+	</update>
+	
+	<update id="setCategoryUpate">
+		update ga_category_group set category_group_name = #{vo.category_group_name}, category_group_level = #{vo.category_group_level} where category_group_idx = #{vo.category_group_idx}
+	</update>
+	
+	<update id="setCategoryUseNot2">
+		update ga_category set category_use_yn = 'n' where category_idx = #{category_idx}
+	</update>
+	
+	<update id="setCategoryUpate2">
+		update ga_category set category_name = #{category_name} where category_idx = #{category_idx}
+	</update>
+	
+	<update id="setCategoryUse2">
+		update ga_category set category_use_yn = 'y' where category_idx = #{category_idx}
+	</update>
+	
+	<delete id="setCategoryGroupDelete">
+		delete from ga_category_group where category_group_idx = #{category_group_idx}
+	</delete>
+	
+	<delete id="setCategoryDelete">
+		delete from ga_category where category_idx = #{category_idx}
+	</delete>
+</mapper>

@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.spring.javagreenS_ljs.dao.PointDAO">
+	
+	<insert id="setUsePointHistory">
+		insert into ga_use_point values (DEFAULT, #{user_idx}, #{use_point_amount}, #{order_idx}, DEFAULT)
+	</insert>
+	
+	<insert id="setSavePointHistory">
+		insert into ga_save_point values (DEFAULT, #{user_idx}, #{save_point_amount}, #{save_reason}, #{order_idx}, #{admin_id}, NOW())
+	</insert>
+	
+	<select id="getSavePointListByUserIdx" resultType="com.spring.javagreenS_ljs.vo.PointVO">
+		select * from ga_save_point where user_idx = #{user_idx} order by created_date desc
+	</select>
+	
+	<select id="getUsePointListByUserIdx" resultType="com.spring.javagreenS_ljs.vo.PointVO">
+		select * from ga_use_point where user_idx = #{user_idx} order by created_date desc
+	</select>
+</mapper>

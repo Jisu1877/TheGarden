@@ -1,0 +1,220 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.spring.javagreenS_ljs.dao.ItemAdminDAO">
+	<select id="getItemMaxIdx" resultType="com.spring.javagreenS_ljs.vo.ItemVO">
+		select Max(item_idx) as item_idx from ga_item
+	</select>
+	
+	<select id="getItemSearch" resultType="com.spring.javagreenS_ljs.vo.ItemVO">
+		select * from ga_item as item JOIN ga_item_notice as notice ON item.item_idx = notice.item_idx where ${searchString} like concat('%', #{item_name},'%') and item_delete_flag = 'n' and display_flag = 'y'; 
+	</select>
+	
+	<select id="getItemAllInforOnlyDisplay" resultType="com.spring.javagreenS_ljs.vo.ItemVO">
+		SELECT i.*,
+		       IFNULL((SELECT SUM(rating) / COUNT(*)
+		               FROM   ga_review r
+		               WHERE  r.item_idx = i.item_idx), 0) AS cal_rating
+		FROM   ga_item i
+		WHERE  i.display_flag = 'y'
+		       AND i.item_delete_flag = 'n'
+		ORDER  BY i.item_idx; 
+	</select>
+	
+	<select id="getItemList" resultType="com.spring.javagreenS_ljs.vo.ItemVO">
+		select * from ga_item where item_delete_flag = 'n' order by display_flag desc
+	</select>
+	
+	<select id="getItemSameSearch" resultType="com.spring.javagreenS_ljs.vo.ItemVO">
+		select * from ga_item as item JOIN ga_item_notice as notice ON item.item_idx = notice.item_idx where ${searchString} = #{searchValue};
+	</select>
+	
+	<select id="getItemOptionInfor" resultType="com.spring.javagreenS_ljs.vo.ItemOptionVO">
+		select * from ga_item_option where item_idx = #{item_idx} and option_display_flag = 'y' order by item_option_idx
+	</select>
+	
+	<select id="getItemImageInfor" resultType="com.spring.javagreenS_ljs.vo.ItemImageVO">
+		select * from ga_item_image where item_idx = #{item_idx} order by item_image_idx
+	</select>
+	
+	<select id="getItemContent" resultType="com.spring.javagreenS_ljs.vo.ItemVO">
+		select * from ga_item where item_idx = #{item_idx}
+	</select>
+	
+	<select id="getBestItemAllInforOnlyDisplay" resultType="com.spring.javagreenS_ljs.vo.ItemVO">
+	   SELECT i.*,
+       IFNULL((SELECT SUM(rating) / COUNT(*)
+               FROM   ga_review r
+               WHERE  r.item_idx = i.item_idx), 0) AS cal_rating
+		FROM   ga_item i
+		WHERE  i.display_flag = 'y'
+		       AND i.item_delete_flag = 'n'
+		order by i.sale_quantity desc
+	</select>
+	
+	<sql id="adminItemWhere">
+		<where>
+			<if test="part == '판매중'">
+				AND display_flag = 'y'
+				AND sold_out = 0
+			</if>
+			<if test="part == '전시중지'">
+				AND display_flag = 'n'
+			</if>
+			<if test="part == '품절'">
+				AND sold_out = 1
+			</if>
+			<if test="search != null and search != ''">
+				AND ${search} like concat('%', #{searchValue},'%')
+			</if>
+			AND item_delete_flag = 'n'
+		</where>
+	</sql>
+	
+	<select id="totRecCnt" resultType="int">
+		select count(*) from ga_item
+		<include refid="adminItemWhere"></include>
+	</select>
+	
+	<select id="getItemListSearch" resultType="com.spring.javagreenS_ljs.vo.ItemVO">
+		select * from ga_item
+		<include refid="adminItemWhere"></include>
+		
+		limit #{startIndexNo}, #{pageSize}
+	</select>
+	
+	<select id="getItemPopularitySort" resultType="com.spring.javagreenS_ljs.vo.ItemVO">
+	   SELECT i.*,
+       IFNULL((SELECT SUM(rating) / COUNT(*)
+               FROM   ga_review r
+               WHERE  r.item_idx = i.item_idx), 0) AS cal_rating
+		FROM   ga_item i
+		WHERE  i.display_flag = 'y'
+		       AND i.item_delete_flag = 'n'
+		order by i.wish desc
+	</select>
+	
+	<select id="getItemSaleSort" resultType="com.spring.javagreenS_ljs.vo.ItemVO">
+		SELECT i.*,
+       IFNULL((SELECT SUM(rating) / COUNT(*)
+               FROM   ga_review r
+               WHERE  r.item_idx = i.item_idx), 0) AS cal_rating
+		FROM   ga_item i
+		WHERE  i.display_flag = 'y'
+		       AND i.item_delete_flag = 'n'
+		order by i.sale_quantity desc
+	</select>
+	
+	<select id="getItemLowPriceSort" resultType="com.spring.javagreenS_ljs.vo.ItemVO">
+		SELECT i.*,
+       IFNULL((SELECT SUM(rating) / COUNT(*)
+               FROM   ga_review r
+               WHERE  r.item_idx = i.item_idx), 0) AS cal_rating
+		FROM   ga_item i
+		WHERE  i.display_flag = 'y'
+		       AND i.item_delete_flag = 'n'
+		order by i.sale_price
+	</select>
+	
+	<select id="getItemNewSort" resultType="com.spring.javagreenS_ljs.vo.ItemVO">
+		SELECT i.*,
+       IFNULL((SELECT SUM(rating) / COUNT(*)
+               FROM   ga_review r
+               WHERE  r.item_idx = i.item_idx), 0) AS cal_rating
+		FROM   ga_item i
+		WHERE  i.display_flag = 'y'
+		       AND i.item_delete_flag = 'n'
+		order by i.item_idx desc
+	</select>
+	
+	<select id="getItemLotsReviewsSort" resultType="com.spring.javagreenS_ljs.vo.ItemVO">
+		SELECT i.*, (select COUNT(*) from ga_review r where r.item_idx = i.item_idx) as count,
+		 IFNULL((SELECT SUM(rating) / COUNT(*)
+               FROM   ga_review r
+               WHERE  r.item_idx = i.item_idx), 0) AS cal_rating
+		FROM   ga_item i
+		JOIN ga_review re
+		ON i.item_idx = re.item_idx
+		WHERE  i.display_flag = 'y'
+		       AND i.item_delete_flag = 'n'
+		GROUP BY i.item_code
+		order by count desc
+	</select>
+	
+	
+	<select id="getItemRatingSort" resultType="com.spring.javagreenS_ljs.vo.ItemVO">
+		SELECT i.*, (select sum(rating) / count(rating) from ga_review r where r.item_idx = i.item_idx) as res,
+		 IFNULL((SELECT SUM(rating) / COUNT(*)
+               FROM   ga_review r
+               WHERE  r.item_idx = i.item_idx), 0) AS cal_rating
+		FROM   ga_item i
+		JOIN ga_review re
+		ON i.item_idx = re.item_idx
+		WHERE  i.display_flag = 'y'
+		       AND i.item_delete_flag = 'n'
+		GROUP BY i.item_code
+		order by res desc
+	</select>
+	
+	<select id="getItemIdx" resultType="int">
+		select item_idx from ga_item where item_code = #{item_code}
+	</select>
+	
+	<insert id="setItemOption">
+		insert into ga_item_option values (DEFAULT, #{maxIdx}, DEFAULT, #{option_name}, #{option_price}, #{option_stock}, #{option_sold_out}, DEFAULT, DEFAULT)
+	</insert>
+	
+	<insert id="setItemImage">
+		insert into ga_item_image values (DEFAULT, #{maxIdx}, #{sFileName}, DEFAULT);
+	</insert>
+	
+	<insert id="setItemInsert">
+		insert into ga_item values (#{itemVO.item_idx}, #{itemVO.item_code}, #{itemVO.item_name}, #{itemVO.item_summary}, #{itemVO.display_flag}, #{itemVO.sale_price}, #{itemVO.seller_discount_flag}, #{itemVO.seller_discount_amount}, #{itemVO.seller_point_flag}, #{itemVO.seller_point}, #{itemVO.sold_out}, #{itemVO.stock_quantity}, #{itemVO.stock_schedule_date}, #{itemVO.order_min_quantity}, #{itemVO.order_max_quantity}, DEFAULT, #{itemVO.item_option_flag}, #{itemVO.detail_content}, #{itemVO.brand}, #{itemVO.form}, #{itemVO.item_model_name}, #{itemVO.origin_country}, #{itemVO.after_service}, DEFAULT, #{itemVO.shipment_address}, #{itemVO.shipment_return_address}, DEFAULT, #{itemVO.shipping_price}, #{itemVO.shipping_free_amount}, #{itemVO.shipping_extra_charge}, #{itemVO.item_return_flag}, #{itemVO.shipping_return_price}, #{itemVO.item_keyword}, #{itemVO.created_admin_id}, DEFAULT, DEFAULT, DEFAULT);
+	</insert>
+	
+	<insert id="setItemNotice">
+		insert into ga_item_notice values (DEFAULT, #{maxIdx}, DEFAULT, #{itemVO.notice_value1}, DEFAULT, #{itemVO.notice_value2}, DEFAULT, #{itemVO.notice_value3}, DEFAULT, #{itemVO.notice_value4}, DEFAULT, #{itemVO.notice_value5});
+	</insert>
+	
+	<update id="setItemImageChange">
+		update ga_item set item_image = #{itemImage} where item_idx = #{maxIdx}
+	</update>
+	
+	<update id="setItemUpdate">
+		update ga_item set item_name = #{itemVO.item_name}, item_summary = #{itemVO.item_summary}, display_flag = #{itemVO.display_flag}, sale_price = #{itemVO.sale_price}, seller_discount_flag = #{itemVO.seller_discount_flag}, seller_discount_amount = #{itemVO.seller_discount_amount}, seller_point_flag = #{itemVO.seller_point_flag}, seller_point = #{itemVO.seller_point}, sold_out = #{itemVO.sold_out}, stock_quantity = #{itemVO.stock_quantity}, stock_schedule_date = #{itemVO.stock_schedule_date}, order_min_quantity = #{itemVO.order_min_quantity}, item_option_flag = #{itemVO.item_option_flag}, detail_content = #{itemVO.detail_content}, brand = #{itemVO.brand}, form = #{itemVO.form}, item_model_name = #{itemVO.item_model_name}, origin_country = #{itemVO.origin_country}, after_service = #{itemVO.after_service}, shipment_address = #{itemVO.shipment_address}, shipment_return_address = #{itemVO.shipment_return_address}, shipping_price = #{itemVO.shipping_price}, shipping_free_amount = #{itemVO.shipping_free_amount}, shipping_extra_charge = #{itemVO.shipping_extra_charge}, item_return_flag =  #{itemVO.item_return_flag}, shipping_return_price = #{itemVO.shipping_return_price}, item_keyword = #{itemVO.item_keyword} where item_idx = #{itemVO.item_idx}
+	</update>
+	
+	<update id="setItemNoticeUpdate">
+		update ga_item_notice set notice_value1 = #{itemVO.notice_value1}, notice_value2 = #{itemVO.notice_value2}, notice_value3 = #{itemVO.notice_value3}, notice_value4 = #{itemVO.notice_value4}, notice_value5 = #{itemVO.notice_value5} where item_idx = #{itemVO.item_idx}
+	</update>
+	
+	<update id="setItemDelete">
+		update ga_item set item_delete_flag = 'y' where item_code = #{item_code}
+	</update>
+	
+	<update id="setItemDisplayUpdate">
+		update ga_item set display_flag = #{flag} where item_idx = #{item_idx}
+	</update>
+	
+	<update id="setdeleteOption">
+		update ga_item_option set option_display_flag = 'n' where item_option_idx = #{item_option_idx}
+	</update>
+	
+	<update id="setItemOptionUpdate">
+		update ga_item_option set option_name = #{vo.option_name}, option_price = #{vo.option_price}, option_stock_quantity = #{vo.option_stock_quantity}, option_sold_out = #{vo.option_sold_out} where item_option_idx = #{vo.item_option_idx}
+	</update>
+	
+	<delete id="setItemImageDelete">
+		delete from ga_item_image where item_image_idx = #{item_image_idx}
+	</delete>
+	
+	<delete id="setItemOptionDelete">
+		delete from ga_item_option where item_idx = #{item_idx}
+	</delete>
+	
+	<delete id="setItemImageDeleteName">
+		delete from ga_item_image where image_name = #{item_image};
+	</delete>
+	
+</mapper>

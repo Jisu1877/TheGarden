@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.spring.javagreenS_ljs.dao.ReviewDAO">
+	
+	<sql id="reviewWhere">
+		<where>
+			<if test="search != null and search != ''">
+				AND ${search} like concat('%', #{searchValue},'%')
+			</if>
+ 			<if test="rating != null and rating != ''">
+				AND rating = #{rating}
+			</if>
+			AND re.delete_yn = 'n'
+		</where>
+	</sql>
+	
+	
+	<insert id="setReviewInsert">
+		insert into ga_review values (DEFAULT, #{vo.item_idx}, #{vo.user_idx}, #{vo.order_idx}, #{vo.order_list_idx}, #{vo.rating}, #{vo.review_subject}, #{vo.review_contents}, #{vo.photo}, DEFAULT, DEFAULT)
+	</insert>
+	
+	<select id="getReviewList" resultType="com.spring.javagreenS_ljs.vo.ReviewVO">
+		select * from ga_review re
+		JOIN ga_item it
+		ON re.item_idx = it.item_idx
+		JOIN ga_user us
+		ON re.user_idx = us.user_idx
+		WHERE re.item_idx = #{item_idx} and re.delete_yn = 'n'
+	</select>
+	
+	<select id="getReviewListUser" resultType="com.spring.javagreenS_ljs.vo.ReviewVO">
+		select * from ga_review re
+		JOIN ga_item it
+		ON re.item_idx = it.item_idx
+		JOIN ga_user us
+		ON re.user_idx = us.user_idx
+		WHERE re.user_idx = #{user_idx} and re.delete_yn = 'n'
+	</select>
+	
+	<select id="getReviewInfor" parameterType="com.spring.javagreenS_ljs.vo.ReviewVO" resultType="com.spring.javagreenS_ljs.vo.ReviewVO">
+		select * from ga_review WHERE review_idx = #{review_idx}
+	</select>
+	
+	<select id="getReviewChartValue" resultType="com.spring.javagreenS_ljs.vo.ReviewVO">
+		SELECT rating, COUNT(rating) as ratingValue FROM ga_review
+		Where item_idx = #{item_idx} and delete_yn = 'n' group by rating order by rating;
+	</select>
+	
+	<select id="getReviewRating" resultType="com.spring.javagreenS_ljs.vo.ReviewVO">
+		select *, sum(rating) / count(rating) as rating_cal from ga_review
+		WHERE item_idx = #{item_idx} and delete_yn = 'n'
+	</select>
+	
+	<select id="getReviewTotalCnt" parameterType="com.spring.javagreenS_ljs.vo.ReviewVO" resultType="int">
+		select count(review_idx) from ga_review re
+		JOIN ga_item it
+		ON re.item_idx = it.item_idx
+		JOIN ga_user us
+		ON re.user_idx = us.user_idx
+		<include refid="reviewWhere"></include>
+	</select>
+	
+	<select id="getreviewListAll" parameterType="com.spring.javagreenS_ljs.vo.ReviewVO" resultType="com.spring.javagreenS_ljs.vo.ReviewVO">
+		select * from ga_review re
+		JOIN ga_item it
+		ON re.item_idx = it.item_idx
+		JOIN ga_user us
+		ON re.user_idx = us.user_idx
+		<include refid="reviewWhere"></include>
+		order by review_idx desc
+		LIMIT #{startIndexNo}, #{pageSize}
+	</select>
+	
+	<update id="setReviewDelete" parameterType="com.spring.javagreenS_ljs.vo.ReviewVO">
+		update ga_review set delete_yn = 'y' where review_idx = #{review_idx}
+	</update>
+	
+	<update id="setReviewPhotoUpdate" parameterType="com.spring.javagreenS_ljs.vo.ReviewVO">
+		update ga_review set photo = #{photo} where review_idx = #{review_idx}
+	</update>
+	
+	<update id="setReviewUpdate" parameterType="com.spring.javagreenS_ljs.vo.ReviewVO">
+		update ga_review set rating = #{rating}, review_subject = #{review_subject}, review_contents = #{review_contents}, photo = #{photo} where review_idx = #{review_idx}
+	</update>
+</mapper>

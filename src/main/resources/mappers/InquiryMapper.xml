@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.spring.javagreenS_ljs.dao.InquiryDAO">
+		
+	<sql id="inquiryWhere">
+		<where>
+			<if test="search != null and search != ''">
+				AND ${search} like concat('%', #{searchValue},'%')
+			</if>
+			<if test="part != null and part != ''">
+				AND admin_answer_yn = #{part}
+			</if>
+			AND delete_yn = 'n'
+		</where>
+	</sql>
+	
+	<insert id="setInquiryInsert" parameterType="com.spring.javagreenS_ljs.vo.InquiryVO">
+	 	insert into ga_inquiry values (DEFAULT, #{user_idx}, #{user_id}, #{inquiry_content}, DEFAULT, DEFAULT, NULL, NULL, DEFAULT)
+	</insert>
+	
+	<select id="getInquiryList" resultType="com.spring.javagreenS_ljs.vo.InquiryVO">
+		select * from ga_inquiry where user_idx = #{user_idx} AND delete_yn = 'n'
+	</select>
+	
+	<select id="getInquiryTotalCnt" resultType="int">
+		select count(*) from ga_inquiry
+		<include refid="inquiryWhere"></include>
+	</select>
+	
+	<select id="getInquiryListAll" parameterType="com.spring.javagreenS_ljs.vo.InquiryVO" resultType="com.spring.javagreenS_ljs.vo.InquiryVO">
+		select * from ga_inquiry
+		<include refid="inquiryWhere"></include>
+		order by inquiry_idx desc
+		LIMIT #{startIndexNo}, #{pageSize}
+	</select>
+	
+	<select id="getInquiryNoAnswerCount" resultType="int">
+		select count(inquiry_idx) from ga_inquiry
+		where admin_answer_yn = 'n' AND delete_yn = 'n'
+	</select>
+	
+	<update id="setInquiryAnswer" parameterType="com.spring.javagreenS_ljs.vo.InquiryVO">
+		update ga_inquiry set admin_answer_yn = 'y', admin_answer = #{admin_answer}, admin_answer_date = now() where inquiry_idx = #{inquiry_idx}
+	</update>
+	
+	<update id="setInquiryDelete" parameterType="com.spring.javagreenS_ljs.vo.InquiryVO">
+		update ga_inquiry set delete_yn = 'y' where inquiry_idx = #{inquiry_idx}
+	</update>
+</mapper>

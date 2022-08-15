@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.spring.javagreenS_ljs.dao.ItemDAO">
+	<select id="getStockquantity" resultType="int">
+		select stock_quantity from ga_item where item_idx = #{item_idx}
+	</select>
+	
+	<select id="getOptionStockquantity" resultType="int">
+		select option_stock_quantity from ga_item_option where item_option_idx = #{option_idx}
+	</select>
+	
+	<select id="getItemInfor" resultType="com.spring.javagreenS_ljs.vo.ItemVO">
+		select * from ga_item where item_idx = #{item_idx}
+	</select>
+	
+	<update id="setOrderUpdate">
+		update ga_item set stock_quantity = stock_quantity - #{quantity}, sale_quantity = sale_quantity + #{quantity} where item_idx = #{item_idx}
+	</update>
+	
+	<update id="setSoldOutUpdate">
+		update ga_item set sold_out = #{sold_out} where item_idx = #{item_idx}
+	</update>
+	
+	<update id="setStockQuantityUpdate">
+		update ga_item set stock_quantity = stock_quantity + #{order_quantity} where item_idx = #{item_idx}
+	</update>
+	
+	<update id="setWishPlus">
+		update ga_item set wish = wish + 1 where item_idx = #{item_idx}
+	</update>
+	
+	<update id="setWishMinus">
+		update ga_item set wish = wish - 1 where item_idx = #{item_idx}
+	</update>
+	
+	<update id="setOptionStockQuantityUpdate">
+		update ga_item_option set option_stock_quantity = option_stock_quantity - #{quantity} where item_option_idx = #{option_idx}
+	</update>
+	
+	<update id="setOptionSoldOutUpdate">
+		update ga_item_option set option_sold_out = #{sold_out} where item_option_idx = #{option_idx}
+	</update>
+</mapper>

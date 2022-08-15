@@ -1,0 +1,489 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.spring.javagreenS_ljs.dao.OrderAdminDAO">
+	
+	<sql id="orderAdminWhere">
+		<if test="search == 'delivery_name'">
+			ud.delivery_name like concat('%', #{searchValue},'%')
+		</if>
+		<if test="search == 'delivery_tel'">
+			ud.delivery_tel like concat('%', #{searchValue},'%')
+		</if>
+		<if test="search == 'name'">
+			us.name like concat('%', #{searchValue},'%')
+		</if>
+		<if test="search == 'tel'">
+			us.tel like concat('%', #{searchValue},'%')
+		</if>
+		<if test="search == 'user_id'">
+			us.user_id like concat('%', #{searchValue},'%')
+		</if>
+		<if test="search == 'order_number'">
+			o.order_number like concat('%', #{searchValue},'%')
+		</if>
+		<if test="search == 'item_idx'">
+			it.item_idx like concat('%', #{searchValue},'%')
+		</if>
+	</sql>
+	
+	<select id="totRecCnt" resultType="int">
+		select count(*) from ga_order_list
+	</select>
+	
+	<select id="totCodeRecCnt" resultType="int">
+		<if test="code == '0'">
+			select count(*) from ga_order_list
+		</if>
+		<if test="code != '0'">
+			select count(*) from ga_order_list where order_status_code = #{code}
+		</if>
+	</select>
+	
+	<select id="totTermRecCnt1" resultType="int">
+		select count(*) from ga_order_list
+		where date(created_date) between date(#{start}) and date(#{end}) 
+	</select>
+	
+	<select id="totTermRecCnt2" resultType="int">
+		select count(*) from ga_order_list
+		where order_status_code = #{code} 
+		and date(created_date) between date(#{start}) and date(#{end})
+	</select>
+	
+	<select id="totSearchRecCnt1" resultType="int">
+		<if test="search == 'delivery_name'">
+			select count(*) from ga_order_list ol
+			JOIN ga_order o
+			ON ol.order_idx = o.order_idx
+			JOIN ga_user_delivery ud
+			ON o.user_idx = ud.user_idx
+			WHERE ud.delivery_name like concat('%', #{searchValue},'%') and ud.default_flag = 'y'
+		</if>
+		<if test="search == 'delivery_tel'">
+			select count(*) from ga_order_list ol
+			JOIN ga_order o
+			ON ol.order_idx = o.order_idx
+			JOIN ga_user_delivery ud
+			ON o.user_idx = ud.user_idx
+			WHERE ud.delivery_tel like concat('%', #{searchValue},'%') and ud.default_flag = 'y'
+		</if>
+		<if test="search == 'name'">
+			select count(*) from ga_order_list ol
+			JOIN ga_order o
+			ON ol.order_idx = o.order_idx
+			JOIN ga_user u
+			ON o.user_idx = u.user_idx
+			WHERE u.name like concat('%', #{searchValue},'%')
+		</if>
+		<if test="search == 'tel'">
+			select count(*) from ga_order_list ol
+			JOIN ga_order o
+			ON ol.order_idx = o.order_idx
+			JOIN ga_user u
+			ON o.user_idx = u.user_idx
+			WHERE u.tel like concat('%', #{searchValue},'%')
+		</if>
+		<if test="search == 'user_id'">
+			select count(*) from ga_order_list ol
+			JOIN ga_order o
+			ON ol.order_idx = o.order_idx
+			JOIN ga_user u
+			ON o.user_idx = u.user_idx
+			WHERE u.user_id like concat('%', #{searchValue},'%')
+		</if>
+		<if test="search == 'order_number'">
+			select count(*) from ga_order_list ol
+			JOIN ga_order o
+			ON ol.order_idx = o.order_idx
+			WHERE o.order_number like concat('%', #{searchValue},'%')
+		</if>
+		<if test="search == 'item_idx'">
+			select count(*) from ga_order_list
+			WHERE item_idx like concat('%', #{searchValue},'%')
+		</if>
+	</select>
+	
+	<select id="totSearchRecCnt2" resultType="int">
+		<if test="search == 'delivery_name'">
+			select count(*) from ga_order_list ol
+			JOIN ga_order o
+			ON ol.order_idx = o.order_idx
+			JOIN ga_user_delivery ud
+			ON o.user_idx = ud.user_idx
+			WHERE ud.delivery_name like concat('%', #{searchValue},'%') and ud.default_flag = 'y'
+		</if>
+		<if test="search == 'delivery_tel'">
+			select count(*) from ga_order_list ol
+			JOIN ga_order o
+			ON ol.order_idx = o.order_idx
+			JOIN ga_user_delivery ud
+			ON o.user_idx = ud.user_idx
+			WHERE ud.delivery_tel like concat('%', #{searchValue},'%') and ud.default_flag = 'y'
+		</if>
+		<if test="search == 'name'">
+			select count(*) from ga_order_list ol
+			JOIN ga_order o
+			ON ol.order_idx = o.order_idx
+			JOIN ga_user u
+			ON o.user_idx = u.user_idx
+			WHERE u.name like concat('%', #{searchValue},'%')
+		</if>
+		<if test="search == 'tel'">
+			select count(*) from ga_order_list ol
+			JOIN ga_order o
+			ON ol.order_idx = o.order_idx
+			JOIN ga_user u
+			ON o.user_idx = u.user_idx
+			WHERE u.tel like concat('%', #{searchValue},'%')
+		</if>
+		<if test="search == 'user_id'">
+			select count(*) from ga_order_list ol
+			JOIN ga_order o
+			ON ol.order_idx = o.order_idx
+			JOIN ga_user u
+			ON o.user_idx = u.user_idx
+			WHERE u.user_id like concat('%', #{searchValue},'%')
+		</if>
+		<if test="search == 'order_number'">
+			select count(*) from ga_order_list ol
+			JOIN ga_order o
+			ON ol.order_idx = o.order_idx
+			WHERE o.order_number like concat('%', #{searchValue},'%')
+		</if>
+		<if test="search == 'item_idx'">
+			select count(*) from ga_order_list
+			WHERE item_idx like concat('%', #{searchValue},'%')
+		</if>
+		<if test="code != '0'">
+			and order_status_code = #{code}
+		</if>
+	</select>
+	
+	<select id="totALLRecCnt1" resultType="int">
+		<if test="search == 'delivery_name'">
+			select count(*) from ga_order_list ol
+			JOIN ga_order o
+			ON ol.order_idx = o.order_idx
+			JOIN ga_user_delivery ud
+			ON o.user_idx = ud.user_idx
+			WHERE ud.delivery_name like concat('%', #{searchValue},'%') and ud.default_flag = 'y'
+			and date(ol.created_date) between date(#{start}) and date(#{end})
+		</if>
+		<if test="search == 'delivery_tel'">
+			select count(*) from ga_order_list ol
+			JOIN ga_order o
+			ON ol.order_idx = o.order_idx
+			JOIN ga_user_delivery ud
+			ON o.user_idx = ud.user_idx
+			WHERE ud.delivery_tel like concat('%', #{searchValue},'%') and ud.default_flag = 'y'
+			and date(ol.created_date) between date(#{start}) and date(#{end})
+		</if>
+		<if test="search == 'name'">
+			select count(*) from ga_order_list ol
+			JOIN ga_order o
+			ON ol.order_idx = o.order_idx
+			JOIN ga_user u
+			ON o.user_idx = u.user_idx
+			WHERE u.name like concat('%', #{searchValue},'%')
+			and date(ol.created_date) between date(#{start}) and date(#{end})
+		</if>
+		<if test="search == 'tel'">
+			select count(*) from ga_order_list ol
+			JOIN ga_order o
+			ON ol.order_idx = o.order_idx
+			JOIN ga_user u
+			ON o.user_idx = u.user_idx
+			WHERE u.tel like concat('%', #{searchValue},'%')
+			and date(ol.created_date) between date(#{start}) and date(#{end})
+		</if>
+		<if test="search == 'user_id'">
+			select count(*) from ga_order_list ol
+			JOIN ga_order o
+			ON ol.order_idx = o.order_idx
+			JOIN ga_user u
+			ON o.user_idx = u.user_idx
+			WHERE u.user_id like concat('%', #{searchValue},'%')
+			and date(ol.created_date) between date(#{start}) and date(#{end})
+		</if>
+		<if test="search == 'order_number'">
+			select count(*) from ga_order_list ol
+			JOIN ga_order o
+			ON ol.order_idx = o.order_idx
+			WHERE o.order_number like concat('%', #{searchValue},'%')
+			and date(ol.created_date) between date(#{start}) and date(#{end})
+		</if>
+		<if test="search == 'item_idx'">
+			select count(*) from ga_order_list
+			WHERE item_idx like concat('%', #{searchValue},'%')
+			and date(created_date) between date(#{start}) and date(#{end})
+		</if>
+	</select>
+	
+	<select id="totALLRecCnt2" resultType="int">
+		<if test="search == 'delivery_name'">
+			select count(*) from ga_order_list ol
+			JOIN ga_order o
+			ON ol.order_idx = o.order_idx
+			JOIN ga_user_delivery ud
+			ON o.user_idx = ud.user_idx
+			WHERE ud.delivery_name like concat('%', #{searchValue},'%') and ud.default_flag = 'y'
+			and date(ol.created_date) between date(#{start}) and date(#{end})
+		</if>
+		<if test="search == 'delivery_tel'">
+			select count(*) from ga_order_list ol
+			JOIN ga_order o
+			ON ol.order_idx = o.order_idx
+			JOIN ga_user_delivery ud
+			ON o.user_idx = ud.user_idx
+			WHERE ud.delivery_tel like concat('%', #{searchValue},'%') and ud.default_flag = 'y'
+			and date(ol.created_date) between date(#{start}) and date(#{end})
+		</if>
+		<if test="search == 'name'">
+			select count(*) from ga_order_list ol
+			JOIN ga_order o
+			ON ol.order_idx = o.order_idx
+			JOIN ga_user u
+			ON o.user_idx = u.user_idx
+			WHERE u.name like concat('%', #{searchValue},'%')
+			and date(ol.created_date) between date(#{start}) and date(#{end})
+		</if>
+		<if test="search == 'tel'">
+			select count(*) from ga_order_list ol
+			JOIN ga_order o
+			ON ol.order_idx = o.order_idx
+			JOIN ga_user u
+			ON o.user_idx = u.user_idx
+			WHERE u.tel like concat('%', #{searchValue},'%')
+			and date(ol.created_date) between date(#{start}) and date(#{end})
+		</if>
+		<if test="search == 'user_id'">
+			select count(*) from ga_order_list ol
+			JOIN ga_order o
+			ON ol.order_idx = o.order_idx
+			JOIN ga_user u
+			ON o.user_idx = u.user_idx
+			WHERE u.user_id like concat('%', #{searchValue},'%')
+			and date(ol.created_date) between date(#{start}) and date(#{end})
+		</if>
+		<if test="search == 'order_number'">
+			select count(*) from ga_order_list ol
+			JOIN ga_order o
+			ON ol.order_idx = o.order_idx
+			WHERE o.order_number like concat('%', #{searchValue},'%')
+			and date(ol.created_date) between date(#{start}) and date(#{end})
+		</if>
+		<if test="search == 'item_idx'">
+			select count(*) from ga_order_list
+			WHERE item_idx like concat('%', #{searchValue},'%')
+			and date(ol.created_date) between date(#{start}) and date(#{end})
+		</if>
+		<if test="code != '0'">
+			and ol.order_status_code = #{code}
+		</if>
+	</select>
+	
+	<select id="getOrderList" resultType="com.spring.javagreenS_ljs.vo.OrderListVO">
+		SELECT * FROM ga_order o
+		JOIN ga_order_list ol
+		ON o.order_idx = ol.order_idx
+		JOIN ga_item it
+		ON ol.item_idx = it.item_idx
+		JOIN ga_user us
+		ON o.user_idx = us.user_idx
+		order by ol.created_date desc limit #{startIndexNo}, #{pageSize}
+	</select>
+	
+	<select id="getOrderListCode" resultType="com.spring.javagreenS_ljs.vo.OrderListVO">
+		SELECT * FROM ga_order o
+		JOIN ga_order_list ol
+		ON o.order_idx = ol.order_idx
+		JOIN ga_item it
+		ON ol.item_idx = it.item_idx
+		JOIN ga_user us
+		ON o.user_idx = us.user_idx
+		WHERE order_status_code = #{code}
+		order by ol.created_date desc limit #{startIndexNo}, #{pageSize}
+	</select>
+	
+	<select id="getOrderInfor" resultType="com.spring.javagreenS_ljs.vo.OrderListVO">
+		SELECT * FROM ga_order o
+		JOIN ga_order_list ol
+		ON o.order_idx = ol.order_idx
+		JOIN ga_item it
+		ON ol.item_idx = it.item_idx
+		JOIN ga_user us
+		ON o.user_idx = us.user_idx
+		where o.order_idx = #{idx}
+	</select>
+	
+	<select id="getOrderListInfor" resultType="com.spring.javagreenS_ljs.vo.OrderListVO">
+		SELECT * FROM ga_order o
+		JOIN ga_order_list ol
+		ON o.order_idx = ol.order_idx
+		JOIN ga_item it
+		ON ol.item_idx = it.item_idx
+		JOIN ga_user us
+		ON o.user_idx = us.user_idx
+		JOIN ga_user_delivery ud
+		ON o.user_idx = ud.user_idx
+		where ol.order_list_idx = #{order_list_idx} and ud.default_flag = 'y'
+	</select>
+	
+	<select id="getOrderCancelRequestInfor" resultType="com.spring.javagreenS_ljs.vo.OrderCancelVO">
+		select * from ga_order_cancel_request ocr
+		JOIN ga_order o
+		ON ocr.order_idx = o.order_idx
+		<![CDATA[ where ocr.order_idx = #{orderIdx} and ocr.order_list_idx = #{listIdx} ]]>;
+	</select>
+	
+	<select id="getOrderListSearch1" resultType="com.spring.javagreenS_ljs.vo.OrderListVO">
+		SELECT * FROM ga_order o
+		JOIN ga_order_list ol
+		ON o.order_idx = ol.order_idx
+		JOIN ga_item it
+		ON ol.item_idx = it.item_idx
+		JOIN ga_user us
+		ON o.user_idx = us.user_idx
+		JOIN ga_user_delivery ud
+		ON o.user_idx = ud.user_idx
+		<where>
+		<include refid="orderAdminWhere"></include>
+		and ud.default_flag = 'y'
+		</where>
+		order by ol.created_date desc limit #{startIndexNo}, #{pageSize}
+	</select>
+	
+	 <select id="getOrderListTerm1" resultType="com.spring.javagreenS_ljs.vo.OrderListVO">
+		SELECT * FROM ga_order o
+		JOIN ga_order_list ol
+		ON o.order_idx = ol.order_idx
+		JOIN ga_item it
+		ON ol.item_idx = it.item_idx
+		JOIN ga_user us
+		ON o.user_idx = us.user_idx
+		where date(o.created_date) between date(#{start}) and date(#{end}) 
+		order by ol.created_date desc limit #{startIndexNo}, #{pageSize}
+	</select>
+	
+	<select id="getOrderListALL1" resultType="com.spring.javagreenS_ljs.vo.OrderListVO">
+		SELECT * FROM ga_order o
+		JOIN ga_order_list ol
+		ON o.order_idx = ol.order_idx
+		JOIN ga_item it
+		ON ol.item_idx = it.item_idx
+		JOIN ga_user us
+		ON o.user_idx = us.user_idx
+		JOIN ga_user_delivery ud
+		ON o.user_idx = ud.user_idx
+		<where>	
+		<include refid="orderAdminWhere"></include>
+		and date(ol.created_date) between date(#{start}) and date(#{end}) and ud.default_flag = 'y'
+		</where>
+		order by ol.created_date desc limit #{startIndexNo}, #{pageSize}
+	</select>
+	
+	<select id="getOrderListSearch2" resultType="com.spring.javagreenS_ljs.vo.OrderListVO">
+		SELECT * FROM ga_order o
+		JOIN ga_order_list ol
+		ON o.order_idx = ol.order_idx
+		JOIN ga_item it
+		ON ol.item_idx = it.item_idx
+		JOIN ga_user us
+		ON o.user_idx = us.user_idx
+		JOIN ga_user_delivery ud
+		ON o.user_idx = ud.user_idx
+		<where>
+		<include refid="orderAdminWhere"></include>
+		<if test="code != '0'">
+			and ol.order_status_code = #{code} and ud.default_flag = 'y'
+		</if>
+		</where>
+		order by ol.created_date desc limit #{startIndexNo}, #{pageSize}
+	</select>
+	
+	<select id="getOrderListTerm2" resultType="com.spring.javagreenS_ljs.vo.OrderListVO">
+		SELECT * FROM ga_order o
+		JOIN ga_order_list ol
+		ON o.order_idx = ol.order_idx
+		JOIN ga_item it
+		ON ol.item_idx = it.item_idx
+		JOIN ga_user us
+		ON o.user_idx = us.user_idx
+		where date(ol.created_date) between date(#{start}) and date(#{end})
+		and ol.order_status_code = #{code}
+		order by ol.created_date desc limit #{startIndexNo}, #{pageSize}
+	</select>
+	
+	<select id="getOrderListALL2" resultType="com.spring.javagreenS_ljs.vo.OrderListVO">
+		SELECT * FROM ga_order o
+		JOIN ga_order_list ol
+		ON o.order_idx = ol.order_idx
+		JOIN ga_item it
+		ON ol.item_idx = it.item_idx
+		JOIN ga_user us
+		ON o.user_idx = us.user_idx
+		JOIN ga_user_delivery ud
+		ON o.user_idx = ud.user_idx
+		<where>
+		<include refid="orderAdminWhere"></include>
+		<if test="code != '0'">
+			and ol.order_status_code = #{code}
+		</if>
+			and date(ol.created_date) between date(#{start}) and date(#{end}) and ud.default_flag = 'y'
+		</where>
+		order by o.created_date desc limit #{startIndexNo}, #{pageSize}
+	</select>
+	
+	<select id="getOrderListWithDelivery" resultType="com.spring.javagreenS_ljs.vo.OrderListVO">
+		SELECT * FROM ga_order o
+		JOIN ga_order_list ol
+		ON o.order_idx = ol.order_idx
+		JOIN ga_item it
+		ON ol.item_idx = it.item_idx
+		JOIN ga_user us
+		ON o.user_idx = us.user_idx
+		JOIN ga_user_delivery ud
+		ON o.user_idx = ud.user_idx
+		where ud.default_flag = 'y' and ol.order_status_code = '2' and ud.default_flag = 'y'
+		order by ol.order_list_idx desc
+	</select>
+	
+	<select id="getShippingList" resultType="com.spring.javagreenS_ljs.vo.ShippingListVO">
+		select * from ga_shipping_list where order_list_idx = #{order_list_idx}
+	</select>
+	
+	<select id="getOrderCheck" resultType="com.spring.javagreenS_ljs.vo.OrderListVO">
+		SELECT * FROM ga_order o
+		JOIN ga_order_list ol
+		ON o.order_idx = ol.order_idx
+		where ol.order_status_code = 2
+		order by ol.order_list_idx desc
+	</select>
+	
+	<update id="setOrderAdminMemo">
+		update ga_order set order_admin_memo = #{memo} where order_idx = #{idx}
+	</update>
+	
+	<update id="setOrderCodeChange">
+		update ga_order_list set order_status_code = #{code}, update_date = now() where order_list_idx = #{idx}
+	</update>
+	
+	<update id="setRejectCodeUpdate">
+		update ga_order_list set reject_code = #{reject_code} where order_list_idx = #{order_list_idx}
+	</update>
+	
+	<update id="setOrderCancelRequestAnswer">
+		update ga_order_cancel_request set request_answer = #{vo.request_answer}, cancel_admin_memo = #{vo.cancel_admin_memo}, request_answer_flag = 'y'
+		where order_cancel_request_idx = #{vo.order_cancel_request_idx}
+	</update>
+	
+	<update id="setOrderExchangeOk">
+		update ga_order_exchange set exchange_status = 1 where order_list_idx = #{ilstIdx}
+	</update>
+	
+	<insert id="setShippingListHistory">
+		insert into ga_shipping_list values (DEFAULT, #{vo.user_idx}, #{vo.order_list_idx}, #{vo.order_number}, #{vo.user_delivery_idx}, #{vo.shipping_company}, #{vo.invoice_number}, DEFAULT);
+	</insert>
+</mapper>
